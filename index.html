@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Coherence Window">
+<meta name="theme-color" content="#0a0a0f">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Coherence Window</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0a0f; --bg2:#12121a; --bg3:#1a1a26;
+  --gold:#c9a84c; --gold-dim:#7a6230;
+  --trop:#8b7fd4; --sid:#4db896; --union:#d4704a; --moon:#e8c872;
+  --text:#e8e4d8; --text-dim:#7a7568;
+  --border:rgba(201,168,76,0.15);
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--bg);color:var(--text);font-family:'Crimson Pro',Georgia,serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    radial-gradient(1px 1px at 15% 20%,rgba(255,255,255,.4) 0%,transparent 100%),
+    radial-gradient(1px 1px at 42% 8%,rgba(255,255,255,.3) 0%,transparent 100%),
+    radial-gradient(1px 1px at 68% 35%,rgba(255,255,255,.35) 0%,transparent 100%),
+    radial-gradient(1px 1px at 85% 15%,rgba(255,255,255,.25) 0%,transparent 100%),
+    radial-gradient(1px 1px at 25% 55%,rgba(255,255,255,.2) 0%,transparent 100%),
+    radial-gradient(1px 1px at 55% 70%,rgba(255,255,255,.3) 0%,transparent 100%),
+    radial-gradient(1px 1px at 10% 80%,rgba(255,255,255,.25) 0%,transparent 100%),
+    radial-gradient(1px 1px at 90% 85%,rgba(255,255,255,.3) 0%,transparent 100%);}
+.app{position:relative;z-index:1;max-width:480px;margin:0 auto;
+  padding:calc(var(--safe-top) + 16px) 20px calc(var(--safe-bot) + 24px);min-height:100vh;}
+
+/* Header */
+.header{text-align:center;padding:8px 0 20px;border-bottom:.5px solid var(--border);margin-bottom:20px;}
+.header h1{font-family:'Cinzel',serif;font-size:22px;font-weight:600;letter-spacing:.12em;color:var(--gold);}
+.header p{font-size:13px;color:var(--text-dim);letter-spacing:.05em;margin-top:4px;font-style:italic;}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--bg2);border-radius:10px;padding:3px;margin-bottom:20px;border:.5px solid var(--border);}
+.tab{flex:1;padding:8px 4px;text-align:center;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.08em;color:var(--text-dim);border-radius:7px;cursor:pointer;transition:all .2s;user-select:none;}
+.tab.active{background:var(--bg3);color:var(--gold);border:.5px solid var(--border);}
+
+/* Sign row */
+.sign-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.sign-row label{font-size:12px;color:var(--text-dim);letter-spacing:.06em;white-space:nowrap;font-family:'Cinzel',serif;}
+.sign-row select{flex:1;background:var(--bg2);color:var(--text);border:.5px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'Crimson Pro',serif;font-size:15px;appearance:none;-webkit-appearance:none;cursor:pointer;}
+
+/* Ring wrap */
+.ring-wrap{background:var(--bg2);border:.5px solid var(--border);border-radius:16px;padding:12px;margin-bottom:16px;}
+
+/* ── Date stepper ───────────────────────────── */
+.date-stepper{
+  background:var(--bg2);border:.5px solid var(--border);
+  border-radius:12px;margin-bottom:16px;padding:12px 14px;
+}
+.date-stepper-header{
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;
+}
+.date-stepper-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.1em;color:var(--gold-dim);}
+.date-today-btn{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.08em;color:var(--gold);
+  border:.5px solid var(--border);border-radius:6px;padding:3px 10px;cursor:pointer;
+  background:transparent;transition:background .15s;}
+.date-today-btn:active{background:var(--bg3);}
+.date-display{
+  text-align:center;font-family:'Cinzel',serif;font-size:20px;
+  color:var(--gold);letter-spacing:.1em;margin-bottom:12px;
+}
+.date-controls{display:flex;gap:8px;}
+.stepper-col{flex:1;display:flex;align-items:center;gap:0;
+  background:var(--bg3);border-radius:8px;overflow:hidden;border:.5px solid var(--border);}
+.stepper-btn{
+  width:36px;height:40px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:var(--text-dim);cursor:pointer;
+  background:transparent;border:none;transition:color .15s,background .15s;
+  flex-shrink:0;
+}
+.stepper-btn:active{color:var(--gold);background:rgba(201,168,76,0.08);}
+.stepper-val{
+  flex:1;text-align:center;font-family:'Crimson Pro',serif;
+  font-size:16px;color:var(--text);pointer-events:none;
+}
+/* ─────────────────────────────────────────── */
+
+/* Status card */
+.status-card{background:var(--bg2);border:.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:14px;line-height:1.7;}
+.status-in{color:var(--union);font-family:'Cinzel',serif;font-size:12px;letter-spacing:.08em;}
+.status-out{color:var(--text-dim);font-family:'Cinzel',serif;font-size:12px;letter-spacing:.08em;}
+.status-detail{color:var(--text-dim);font-size:13px;margin-top:4px;}
+
+/* Legend */
+.legend{display:flex;flex-wrap:wrap;gap:10px 16px;margin-bottom:20px;}
+.leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-dim);}
+.leg-dot{width:9px;height:9px;border-radius:50%;}
+
+/* Timeline tiles */
+.tl-section-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.1em;color:var(--gold-dim);margin-bottom:12px;}
+.tl-tiles{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:0;}
+.tl-bottom{margin-top:20px;}
+.tl-tile{width:56px;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--bg2);border:1.5px solid var(--bg3);border-radius:10px;cursor:pointer;
+  transition:border-color .2s,box-shadow .2s;position:relative;}
+.tl-tile.past{opacity:.35;border-color:var(--bg3);}
+.tl-tile.future{border-color:rgba(201,168,76,0.2);}
+.tl-tile.current{border-color:#3ddc84;box-shadow:0 0 10px rgba(61,220,132,0.25);}
+.tl-tile.next{border-color:#d4704a;box-shadow:0 0 10px rgba(212,112,74,0.2);}
+.tl-tile-month{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.06em;color:var(--text);line-height:1;}
+.tl-tile.past .tl-tile-month{color:var(--text-dim);}
+.tl-tile-num{font-size:10px;color:var(--text-dim);margin-top:3px;font-family:'Crimson Pro',serif;}
+.tl-tile.current .tl-tile-num{color:#3ddc84;}
+.tl-tile.next .tl-tile-num{color:var(--union);}
+.tl-detail{background:var(--bg2);border:.5px solid var(--border);border-radius:12px;padding:16px 14px 16px 20px;font-size:13px;line-height:1.8;display:none;margin-bottom:16px;overflow:visible;}
+.tl-detail.open{display:block;}
+.tl-detail-title{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.08em;color:var(--gold);margin-bottom:8px;}
+.phase-bar{height:4px;border-radius:2px;background:var(--bg3);margin-top:10px;overflow:hidden;position:relative;}
+.phase-trop{position:absolute;height:100%;background:var(--trop);opacity:.6;border-radius:2px;}
+.phase-sid{position:absolute;height:100%;background:var(--sid);opacity:.6;border-radius:2px;}
+.phase-now{position:absolute;height:100%;width:2px;background:white;border-radius:1px;}
+
+.view{display:none;} .view.active{display:block;}
+.note{font-size:12px;color:var(--text-dim);font-style:italic;text-align:center;padding:0 8px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>Coherence Window</h1>
+    <p>Kundalini lunar calendar · 2026</p>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('rings',this)">Rings</div>
+    <div class="tab" onclick="switchTab('timeline',this)">Timeline</div>
+    <div class="tab" onclick="switchTab('about',this)">About</div>
+  </div>
+
+  <!-- RINGS VIEW -->
+  <div class="view active" id="view-rings">
+    <div class="sign-row">
+      <label>Sign</label>
+      <select id="sign-select" onchange="render()"></select>
+    </div>
+    <div class="ring-wrap">
+      <svg id="zodiac-svg" width="100%" viewBox="0 0 360 360"></svg>
+    </div>
+
+    <!-- Date stepper -->
+    <div class="date-stepper">
+      <div class="date-stepper-header">
+        <span class="date-stepper-label">Viewing date</span>
+        <button class="date-today-btn" onclick="resetToToday()">Today</button>
+      </div>
+      <div class="date-display" id="date-display">—</div>
+      <div class="date-controls">
+        <div class="stepper-col">
+          <button class="stepper-btn" onclick="stepDay(-1)">‹</button>
+          <div class="stepper-val" id="val-day">14</div>
+          <button class="stepper-btn" onclick="stepDay(1)">›</button>
+        </div>
+        <div class="stepper-col">
+          <button class="stepper-btn" onclick="stepMonth(-1)">‹</button>
+          <div class="stepper-val" id="val-month">Jun</div>
+          <button class="stepper-btn" onclick="stepMonth(1)">›</button>
+        </div>
+        <div class="stepper-col">
+          <button class="stepper-btn" style="visibility:hidden">‹</button>
+          <div class="stepper-val" id="val-year">2026</div>
+          <button class="stepper-btn" style="visibility:hidden">›</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="leg"><div class="leg-dot" style="background:var(--trop)"></div>Tropical</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--sid)"></div>Sidereal</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--union)"></div>Union window</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--moon)"></div>Moon</div>
+    </div>
+    <div class="status-card" id="status-card"></div>
+    <div class="note">Ayanamsa ~24° · sidereal opens ~1.8 days after tropical</div>
+  </div>
+
+  <!-- TIMELINE VIEW -->
+  <div class="view" id="view-timeline">
+    <div class="tl-detail" id="tl-detail"></div>
+    <div class="tl-bottom">
+      <div class="tl-section-label">2026 · <span id="tl-sign-name">Gemini</span> · tap a tile for details</div>
+      <div class="tl-tiles" id="tl-tiles"></div>
+    </div>
+  </div>
+
+  <!-- ABOUT VIEW -->
+  <div class="view" id="view-about">
+    <div class="status-card" style="font-size:14px;line-height:1.8">
+      <div style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:.1em;color:var(--gold);margin-bottom:10px">What is this?</div>
+      Shows when the Moon is in your zodiac sign in 2026 — in both the
+      <span style="color:var(--trop)">tropical</span> (season-anchored) and
+      <span style="color:var(--sid)">sidereal</span> (star-anchored) systems.<br><br>
+      The <span style="color:var(--union)">union window</span> spans from when the tropical window opens to when the sidereal window closes.<br><br>
+      Use the day/month steppers to move through 2026 and see the Moon's position and window status for any date.<br><br>
+      <div style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:.1em;color:var(--gold);margin:16px 0 10px">A protocol for active participation</div>
+      You can follow this protocol in your union windows:<br><br>
+      <div style="padding-left:4px;color:var(--text-dim)">
+        <div style="margin-bottom:6px">· Limiting excess stimulation (screen time, alcohol, caffeine, etc.)</div>
+        <div style="margin-bottom:6px">· Eating only plant-based, unprocessed food</div>
+        <div style="margin-bottom:6px">· Drinking alkaline water (pH 9.0+)</div>
+        <div style="margin-bottom:6px">· No sexual activity</div>
+        <div style="margin-bottom:6px">· Limiting the expression of fear and anger</div>
+      </div>
+      <br>If you choose to participate, expect challenges. Do the opposite of what your impulses tell you.<br><br>
+      <div style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:.1em;color:var(--gold);margin:10px 0 8px">Technical notes</div>
+      Tropical windows derived by applying a δ ≈ 1.836 day offset (ayanamsa 24.18° ÷ lunar speed 13.17°/day). The union window spans from tropical entry to sidereal exit — the widest conservative estimate.<br><br>
+      Moon position is approximated from a linear model anchored to the Jan 27 2026 Gemini entry. Accurate to within a few hours; not ephemeris-grade.<br><br>
+      <span style="color:var(--text-dim)">Currently only Gemini is verified against source data. Other signs coming.</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Constants ─────────────────────────────────────────────
+const SIGN_FULL    = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+const SIGNS_SHORT  = ['Ari','Tau','Gem','Can','Leo','Vir','Lib','Sco','Sag','Cap','Aqu','Pis'];
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DELTA_MS     = 1.836246489 * 86400 * 1000;
+const AYAN         = 24.18;
+const REF_TIME     = new Date(2026, 0, 27, 20, 54, 0).getTime();
+const MOON_SPD     = 13.16816677;
+const DAYS_PER_SIGN = 30 / MOON_SPD;
+
+function localDate(str) {
+  const [dt, tm] = str.split('T');
+  const [y,mo,d] = dt.split('-').map(Number);
+  const [h,mi]   = tm.split(':').map(Number);
+  return new Date(y, mo-1, d, h, mi, 0);
+}
+
+const GEMINI_SID = [
+  ['2026-01-27T20:54','2026-01-31T14:00'],['2026-02-24T02:28','2026-02-27T20:09'],
+  ['2026-03-23T08:18','2026-03-27T01:11'],['2026-04-19T17:17','2026-04-23T08:16'],
+  ['2026-05-17T03:22','2026-05-20T17:07'],['2026-06-13T14:05','2026-06-17T03:39'],
+  ['2026-07-10T23:41','2026-07-14T13:50'],['2026-08-07T07:07','2026-08-10T22:35'],
+  ['2026-09-03T12:47','2026-09-07T05:15'],['2026-09-30T18:25','2026-10-04T10:35'],
+  ['2026-10-28T01:01','2026-10-31T13:54'],['2026-11-24T11:09','2026-11-28T02:00'],
+  ['2026-12-21T22:26','2026-12-25T12:58'],
+];
+
+// ── State ─────────────────────────────────────────────────
+let currentSign  = 2;
+let selectedTile = null;
+// viewDate: always constructed explicitly, never read from DOM scroll
+const _today = new Date();
+let viewDate = (_today.getFullYear() === 2026)
+  ? new Date(_today.getFullYear(), _today.getMonth(), _today.getDate(), 12, 0, 0)
+  : new Date(2026, 5, 14, 12, 0, 0); // fallback: Jun 14 2026
+
+// ── Data ──────────────────────────────────────────────────
+function buildWindows(signIdx) {
+  const off = (signIdx - 2) * DAYS_PER_SIGN * 86400000;
+  return GEMINI_SID.map(([ss,se]) => {
+    const sidStart  = new Date(localDate(ss).getTime() + off);
+    const sidEnd    = new Date(localDate(se).getTime() + off);
+    const tropStart = new Date(sidStart.getTime() - DELTA_MS);
+    const tropEnd   = new Date(sidEnd.getTime()   - DELTA_MS);
+    return {sidStart, sidEnd, tropStart, tropEnd, unionStart:tropStart, unionEnd:sidEnd};
+  });
+}
+
+function moonDegAt(date) {
+  // REF_TIME = Jan 27 20:54 = Moon at sidereal Gemini 0° = absolute 60°
+  const relDeg = (((date.getTime()-REF_TIME)/86400000*MOON_SPD)%360+360)%360;
+  return norm(relDeg + 60);
+}
+
+// ── SVG ───────────────────────────────────────────────────
+const CX=180,CY=180,R_TROP=68,R_SID=88,R_UNION=108;
+// Gemini sidereal width derived from calendar data: ~47.88°
+// Other signs estimated at 30° for now (will be corrected when verified)
+const GEM_WIDTH = 47.88162093; // degrees, sidereal Gemini only
+const GEM_IDX   = 2;           // Gemini = sign index 2
+const toRad = d => d*Math.PI/180;
+const px = (r,d) => CX+r*Math.cos(toRad(d-90));
+const py = (r,d) => CY+r*Math.sin(toRad(d-90));
+const norm = d => ((d%360)+360)%360;
+function arcD(r,s,e){
+  const sp=((e-s)+360)%360||360;
+  if(sp>=359.9)return`M${px(r,0)},${py(r,0)}A${r},${r} 0 1,1 ${px(r,.01)},${py(r,.01)}`;
+  return`M${px(r,s)},${py(r,s)}A${r},${r} 0 ${sp>180?1:0},1 ${px(r,e)},${py(r,e)}`;
+}
+function svgEl(tag,attrs){
+  const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);
+  return el;
+}
+
+function drawRings(signIdx, date) {
+  const svg=document.getElementById('zodiac-svg');
+  svg.innerHTML='';
+  const moon=moonDegAt(date);
+  [R_TROP,R_SID,R_UNION].forEach(r=>svg.appendChild(svgEl('circle',{cx:CX,cy:CY,r,fill:'none',stroke:'rgba(255,255,255,.05)','stroke-width':'14'})));
+
+  for(let i=0;i<12;i++){
+    const sel=i===signIdx;
+    // Sidereal ring: use real width for selected Gemini, 30° for others
+    const sidW  = (sel && i===GEM_IDX) ? GEM_WIDTH : 30;
+    const sidS  = norm(i*30);
+    const sidE  = norm(sidS + sidW);
+    svg.appendChild(svgEl('path',{d:arcD(R_SID,sidS,sidE),fill:'none',stroke:sel?'#4db896':'rgba(77,184,150,.12)','stroke-width':'13','stroke-linecap':'butt'}));
+    // Tropical ring: always 30°
+    const tropS = norm(i*30-AYAN);
+    const tropE = norm(tropS+30);
+    svg.appendChild(svgEl('path',{d:arcD(R_TROP,tropS,tropE),fill:'none',stroke:sel?'#8b7fd4':'rgba(139,127,212,.12)','stroke-width':'13','stroke-linecap':'butt'}));
+  }
+
+  // Union arc: tropical start → sidereal end (using real Gemini width)
+  const uSidW  = (signIdx===GEM_IDX) ? GEM_WIDTH : 30;
+  const unionS = norm(signIdx*30-AYAN);          // tropical start
+  const unionE = norm(signIdx*30 + uSidW);       // sidereal end
+  svg.appendChild(svgEl('path',{d:arcD(R_UNION,unionS,unionE),fill:'none',stroke:'#d4704a','stroke-width':'13','stroke-linecap':'butt','stroke-opacity':'.7'}));
+  for(let i=0;i<12;i++){
+    if(i===signIdx)continue;
+    svg.appendChild(svgEl('path',{d:arcD(R_UNION,norm(i*30-AYAN),norm(i*30+30)),fill:'none',stroke:'rgba(212,112,74,.07)','stroke-width':'13'}));
+  }
+  for(let i=0;i<12;i++){
+    [[R_SID,i*30],[R_TROP,norm(i*30-AYAN)],[R_UNION,norm(i*30-AYAN)]].forEach(([r,d])=>
+      svg.appendChild(svgEl('line',{x1:px(r-7,d),y1:py(r-7,d),x2:px(r+7,d),y2:py(r+7,d),stroke:'rgba(255,255,255,.12)','stroke-width':'.5'})));
+    const mid=norm(i*30+15);
+    const t=svgEl('text',{x:px(R_SID,mid),y:py(R_SID,mid),'text-anchor':'middle','dominant-baseline':'central','font-size':'8','font-family':'Cinzel,serif',fill:i===signIdx?'#4db896':'rgba(255,255,255,.2)','font-weight':i===signIdx?'600':'400'});
+    t.textContent=SIGNS_SHORT[i]; svg.appendChild(t);
+  }
+  svg.appendChild(svgEl('path',{d:arcD(48,0,AYAN),fill:'none',stroke:'#c9a84c','stroke-width':'1.5','stroke-dasharray':'3 2','stroke-opacity':'.6'}));
+  const at=svgEl('text',{x:px(62,AYAN/2),y:py(62,AYAN/2),'text-anchor':'middle','dominant-baseline':'central','font-size':'8','font-family':'Crimson Pro,serif',fill:'#c9a84c','fill-opacity':'.8'});
+  at.textContent='24°'; svg.appendChild(at);
+  svg.appendChild(svgEl('circle',{cx:CX,cy:CY,r:18,fill:'rgba(55,138,221,.12)',stroke:'rgba(55,138,221,.3)','stroke-width':'1'}));
+  const et=svgEl('text',{x:CX,y:CY,'text-anchor':'middle','dominant-baseline':'central','font-size':'7','font-family':'Cinzel,serif',fill:'#378add','fill-opacity':'.7'});
+  et.textContent='Earth'; svg.appendChild(et);
+  const mr=(R_SID+R_UNION)/2;
+  svg.appendChild(svgEl('circle',{cx:px(mr,moon),cy:py(mr,moon),r:'6',fill:'#e8c872',stroke:'#ba7517','stroke-width':'1'}));
+  [[R_TROP,195,'Tropical','#8b7fd4'],[R_SID,195,'Sidereal','#4db896'],[R_UNION,195,'Union','#d4704a']].forEach(([r,deg,lbl,col])=>{
+    const t=svgEl('text',{x:px(r,deg),y:py(r,deg),'text-anchor':'middle','dominant-baseline':'central','font-size':'7.5','font-family':'Cinzel,serif',fill:col,'fill-opacity':'.7'});
+    t.textContent=lbl; svg.appendChild(t);
+  });
+}
+
+// ── Status card ───────────────────────────────────────────
+function buildStatusCard(signIdx, date) {
+  const wins=buildWindows(signIdx), signName=SIGN_FULL[signIdx];
+  const card=document.getElementById('status-card');
+  const fmt=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  const fmtS=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  let cur=null,nxt=null;
+  for(const w of wins){
+    if(date>=w.unionStart&&date<=w.unionEnd){cur=w;break;}
+    if(date<w.unionStart&&!nxt)nxt=w;
+  }
+  if(cur){
+    const hL=Math.round((cur.unionEnd-date)/3600000);
+    const inT=date>=cur.tropStart&&date<=cur.tropEnd;
+    const inS=date>=cur.sidStart&&date<=cur.sidEnd;
+    const ph=inT&&inS?'Both systems active':inT?'Tropical only · sidereal opening soon':'Sidereal only · tropical has closed';
+    card.innerHTML=`<div class="status-in">● Window open — ${signName}</div>
+      <div class="status-detail" style="margin-top:6px">${ph}</div>
+      <div class="status-detail">Closes ${fmt(cur.unionEnd)} · ${hL}h remaining</div>
+      <div class="status-detail" style="margin-top:6px;color:var(--trop)">Trop: ${fmt(cur.tropStart)} → ${fmt(cur.tropEnd)}</div>
+      <div class="status-detail" style="color:var(--sid)">Sid: ${fmt(cur.sidStart)} → ${fmt(cur.sidEnd)}</div>`;
+  } else if(nxt){
+    const hU=Math.round((nxt.unionStart-date)/3600000);
+    const prep=new Date(nxt.unionStart.getTime()-86400000);
+    card.innerHTML=`<div class="status-out">○ Window closed — ${signName}</div>
+      <div class="status-detail" style="margin-top:6px">Next window opens ${fmt(nxt.unionStart)}</div>
+      <div class="status-detail">In ${(hU/24).toFixed(1)} days (${hU}h)</div>
+      <div class="status-detail" style="margin-top:6px;color:var(--gold-dim)">Prep from: ${fmt(prep)}</div>
+      <div class="status-detail" style="color:var(--trop)">Trop: ${fmtS(nxt.tropStart)} → ${fmtS(nxt.tropEnd)}</div>
+      <div class="status-detail" style="color:var(--sid)">Sid: ${fmtS(nxt.sidStart)} → ${fmtS(nxt.sidEnd)}</div>`;
+  } else {
+    card.innerHTML=`<div class="status-out">No more windows for ${signName} in 2026.</div>`;
+  }
+}
+
+// ── Timeline ──────────────────────────────────────────────
+function buildTimeline(signIdx, date) {
+  document.getElementById('tl-sign-name').textContent=SIGN_FULL[signIdx];
+  const wins=buildWindows(signIdx);
+  const tilesEl=document.getElementById('tl-tiles');
+  const detailEl=document.getElementById('tl-detail');
+  tilesEl.innerHTML=''; detailEl.classList.remove('open'); detailEl.innerHTML=''; selectedTile=null;
+  const fmt=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  const mCount={};
+  wins.forEach(w=>{const m=w.unionStart.getMonth();mCount[m]=(mCount[m]||0)+1;});
+  const mSeen={};
+  let foundNext=false;
+  wins.forEach((w,idx)=>{
+    const isPast=date>w.unionEnd, isCur=date>=w.unionStart&&date<=w.unionEnd, isFut=date<w.unionStart;
+    const isNext=isFut&&!foundNext; if(isNext)foundNext=true;
+    const m=w.unionStart.getMonth(); mSeen[m]=(mSeen[m]||0)+1;
+    const label=mCount[m]>1?MONTHS_SHORT[m]+'/'+mSeen[m]:MONTHS_SHORT[m];
+    const cls=isPast?'past':isCur?'current':isNext?'next':'future';
+    const tile=document.createElement('div');
+    tile.className=`tl-tile ${cls}`;
+    tile.innerHTML=`<div class="tl-tile-month">${label}</div><div class="tl-tile-num">${isCur?'open':isNext?'next':isPast?'past':''}</div>`;
+    tile.addEventListener('click',()=>{
+      if(selectedTile===idx){selectedTile=null;detailEl.classList.remove('open');detailEl.innerHTML='';return;}
+      selectedTile=idx;
+      renderDetailBar(detailEl, w, isCur ? date : null, idx+1, label);
+      detailEl.classList.add('open');
+    });
+    tilesEl.appendChild(tile);
+  });
+}
+
+// ── Vertical detail bar ───────────────────────────────────
+function renderDetailBar(el, w, nowDate, winNum, label) {
+  const BAR_H = 320; // px height of bar in SVG units
+  const BAR_W = 18;
+  const LBL_X = 28;  // x where right-side labels start
+  const SVG_W = 220;
+  const SVG_H = BAR_H + 40; // top/bottom padding
+
+  const unionSpan = w.unionEnd - w.unionStart;
+  const durD = (unionSpan / 3600000 / 24).toFixed(1);
+
+  // Convert a timestamp to a Y position (bottom=start, top=end)
+  function toY(ts) {
+    const frac = (ts - w.unionStart) / unionSpan;
+    return SVG_H - 20 - frac * BAR_H;
+  }
+
+  // Collect midnight crossings within the window
+  const midnights = [];
+  const cursor = new Date(w.unionStart);
+  // advance to next midnight
+  cursor.setHours(24, 0, 0, 0);
+  while (cursor < w.unionEnd) {
+    midnights.push(new Date(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  const fmtTime = d => d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  const fmtDate = d => d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  const fmtFull = d => `${fmtDate(d)} ${fmtTime(d)}`;
+
+  // Segment fractions
+  const tropS = toY(w.tropStart), tropE = toY(w.tropEnd);
+  const sidS  = toY(w.sidStart),  sidE  = toY(w.sidEnd);
+  const barTop    = toY(w.unionEnd);   // top of bar (smaller Y = higher)
+  const barBottom = toY(w.unionStart); // bottom of bar
+
+  // Now marker
+  const nowY = (nowDate && nowDate >= w.unionStart && nowDate <= w.unionEnd)
+    ? toY(nowDate.getTime()) : null;
+
+  let svgRows = `
+    <svg width="100%" viewBox="0 0 ${SVG_W} ${SVG_H}" xmlns="http://www.w3.org/2000/svg"
+         style="font-family:'Crimson Pro',serif;overflow:visible">
+
+    <!-- Base bar -->
+    <rect x="0" y="${barTop}" width="${BAR_W}" height="${barBottom - barTop}"
+          fill="rgba(255,255,255,0.07)" rx="3"/>
+
+    <!-- Bar border -->
+    <rect x="0" y="${barTop}" width="${BAR_W}" height="${barBottom - barTop}"
+          fill="none" stroke="rgba(201,168,76,0.2)" stroke-width="0.5" rx="3"/>
+  `;
+
+  // 00:00–08:00 shaded bands for each day within the window
+  const bandCursor = new Date(w.unionStart);
+  bandCursor.setHours(0, 0, 0, 0); // go back to midnight of start day
+  while (bandCursor < w.unionEnd) {
+    const bandStart = new Date(bandCursor);           // 00:00
+    const bandEnd   = new Date(bandCursor.getTime() + 8 * 3600000); // 08:00
+    // Clamp to union window
+    const clampedStart = bandStart < w.unionStart ? w.unionStart : bandStart;
+    const clampedEnd   = bandEnd   > w.unionEnd   ? w.unionEnd   : bandEnd;
+    if (clampedEnd > clampedStart) {
+      const y1 = toY(clampedEnd.getTime());   // top (earlier in time = higher Y number = lower on screen... wait, bottom=start)
+      const y2 = toY(clampedStart.getTime()); // bottom
+      svgRows += `<rect x="0" y="${y1}" width="${BAR_W}" height="${y2 - y1}"
+        fill="rgba(120,100,220,0.12)" rx="0"/>`;
+    }
+    bandCursor.setDate(bandCursor.getDate() + 1);
+  }
+  midnights.forEach(mn => {
+    const y = toY(mn.getTime());
+    svgRows += `
+      <line x1="0" y1="${y}" x2="${BAR_W + 6}" y2="${y}"
+            stroke="rgba(255,255,255,0.2)" stroke-width="0.5" stroke-dasharray="2 2"/>
+      <text x="${LBL_X}" y="${y + 1}" font-size="10" fill="rgba(255,255,255,0.35)"
+            dominant-baseline="middle">${fmtDate(mn)}</text>
+    `;
+  });
+
+  // Trop close / sid open labels removed per request
+
+  // Bottom label (union start)
+  svgRows += `
+    <text x="${LBL_X}" y="${barBottom - 2}" font-size="10.5"
+          fill="rgba(232,228,216,0.9)" dominant-baseline="auto">
+      ${fmtFull(w.unionStart)}
+    </text>
+    <text x="${LBL_X}" y="${barBottom + 10}" font-size="9"
+          fill="rgba(139,127,212,0.8)" dominant-baseline="auto">
+      trop opens
+    </text>
+  `;
+
+  // Top label (union end)
+  svgRows += `
+    <text x="${LBL_X}" y="${barTop + 12}" font-size="10.5"
+          fill="rgba(232,228,216,0.9)" dominant-baseline="auto">
+      ${fmtFull(w.unionEnd)}
+    </text>
+    <text x="${LBL_X}" y="${barTop + 22}" font-size="9"
+          fill="rgba(77,184,150,0.8)" dominant-baseline="auto">
+      sid closes
+    </text>
+  `;
+
+  // Transition time labels removed per request
+
+  // Now marker
+  if (nowY !== null) {
+    svgRows += `
+      <line x1="-6" y1="${nowY}" x2="${BAR_W + 6}" y2="${nowY}"
+            stroke="white" stroke-width="1.5"/>
+      <circle cx="${BAR_W + 10}" cy="${nowY}" r="3" fill="white"/>
+      <text x="${BAR_W + 16}" y="${nowY + 1}" font-size="10" fill="white"
+            dominant-baseline="middle">now</text>
+    `;
+  }
+
+  svgRows += `</svg>`;
+
+  el.innerHTML = `
+    <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.08em;
+                color:var(--gold);margin-bottom:14px">
+      Window ${winNum} · ${label} · ${durD} days
+    </div>
+    ${svgRows}
+  `;
+}
+
+// ── Date stepper ──────────────────────────────────────────
+function updateStepperDisplay() {
+  const d=viewDate.getDate(), m=viewDate.getMonth(), y=viewDate.getFullYear();
+  document.getElementById('val-day').textContent   = String(d).padStart(2,'0');
+  document.getElementById('val-month').textContent = MONTHS_SHORT[m];
+  document.getElementById('val-year').textContent  = y;
+  document.getElementById('date-display').textContent =
+    `${String(d).padStart(2,'0')} ${MONTHS_SHORT[m]} ${y}`;
+}
+
+function clampDate(y,m,d){
+  const max=new Date(y,m+1,0).getDate();
+  return new Date(y, m, Math.min(d,max), 12, 0, 0);
+}
+
+function stepDay(delta){
+  const d=viewDate.getDate()+delta, m=viewDate.getMonth(), y=2026;
+  const max=new Date(y,m+1,0).getDate();
+  if(d<1||d>max)return;
+  viewDate=new Date(y,m,d,12,0,0);
+  updateStepperDisplay(); render();
+}
+
+function stepMonth(delta){
+  let m=viewDate.getMonth()+delta, y=2026;
+  if(m<0||m>11)return;
+  viewDate=clampDate(y,m,viewDate.getDate());
+  updateStepperDisplay(); render();
+}
+
+function resetToToday(){
+  const t=new Date();
+  viewDate=(t.getFullYear()===2026)
+    ? new Date(t.getFullYear(),t.getMonth(),t.getDate(),12,0,0)
+    : new Date(2026,5,14,12,0,0);
+  updateStepperDisplay(); render();
+}
+
+// ── Render ────────────────────────────────────────────────
+function render() {
+  currentSign=parseInt(document.getElementById('sign-select').value);
+  drawRings(currentSign, viewDate);
+  buildStatusCard(currentSign, viewDate);
+  buildTimeline(currentSign, viewDate);
+}
+
+// ── Tab switching ─────────────────────────────────────────
+function switchTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('view-'+name).classList.add('active');
+}
+
+// ── Sign selector ─────────────────────────────────────────
+const sel=document.getElementById('sign-select');
+const o=document.createElement('option');
+o.value=2; o.textContent='Gemini'; o.selected=true;
+sel.appendChild(o);
+sel.disabled=true; sel.style.opacity='0.5';
+
+// ── Init ──────────────────────────────────────────────────
+updateStepperDisplay();
+render();
+// ── Service Worker ────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/coherence-window/sw.js');
+  });
+}
+</script>
+</body>
+</html>
