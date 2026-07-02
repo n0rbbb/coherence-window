@@ -249,6 +249,67 @@ const GEMINI_SID = [
   ['2026-12-21T22:26','2026-12-25T12:58'],
 ];
 
+// Leo — calibrated from 3 verified windows (Apr, Jul, Aug 2026)
+// Offset from Gemini: 4.0801 days, avg duration: 84.74h
+const LEO_SID = [
+  ['2026-01-31T22:49','2026-02-04T11:34'],['2026-02-28T04:23','2026-03-03T17:08'],
+  ['2026-03-27T10:13','2026-03-30T22:58'],['2026-04-23T19:12','2026-04-27T07:57'],
+  ['2026-05-21T05:17','2026-05-24T18:02'],['2026-06-17T16:00','2026-06-21T04:45'],
+  ['2026-07-15T01:36','2026-07-18T14:21'],['2026-08-11T09:02','2026-08-14T21:47'],
+  ['2026-09-07T14:42','2026-09-11T03:27'],['2026-10-04T20:20','2026-10-08T09:05'],
+  ['2026-11-01T02:56','2026-11-04T15:41'],['2026-11-28T13:04','2026-12-02T01:49'],
+  ['2026-12-26T00:21','2026-12-29T13:06'],
+];
+
+// Pisces — calibrated from 3 verified windows (Jan, Mar, Jul 2026)
+// Offset from Gemini: −6.4047 days, avg duration: 94.76h
+const PISCES_SID = [
+  ['2026-01-21T11:11','2026-01-25T09:56'],['2026-02-17T16:45','2026-02-21T15:30'],
+  ['2026-03-16T22:35','2026-03-20T21:20'],['2026-04-13T07:34','2026-04-17T06:19'],
+  ['2026-05-10T17:39','2026-05-14T16:24'],['2026-06-07T04:22','2026-06-11T03:07'],
+  ['2026-07-04T13:58','2026-07-08T12:43'],['2026-07-31T21:24','2026-08-04T20:09'],
+  ['2026-08-28T03:04','2026-09-01T01:49'],['2026-09-24T08:42','2026-09-28T07:27'],
+  ['2026-10-21T15:18','2026-10-25T14:03'],['2026-11-18T01:26','2026-11-22T00:11'],
+  ['2026-12-15T12:43','2026-12-19T11:28'],
+];
+
+// Cancer — calibrated from 3 verified windows (Jan, Jul, Nov 2026)
+// Offset from Gemini: +1.9019 days, avg duration: 87.46h
+const CANCER_SID = [
+  ['2026-01-29T18:32','2026-02-02T10:00'],['2026-02-26T00:06','2026-03-01T15:34'],
+  ['2026-03-25T05:56','2026-03-28T21:24'],['2026-04-21T14:55','2026-04-25T06:23'],
+  ['2026-05-19T01:00','2026-05-22T16:28'],['2026-06-15T11:43','2026-06-19T03:11'],
+  ['2026-07-12T21:19','2026-07-16T12:47'],['2026-08-09T04:45','2026-08-12T20:13'],
+  ['2026-09-05T10:25','2026-09-09T01:53'],['2026-10-02T16:03','2026-10-06T07:31'],
+  ['2026-10-29T22:39','2026-11-02T14:07'],['2026-11-26T08:47','2026-11-30T00:15'],
+  ['2026-12-23T20:04','2026-12-27T11:32'],
+];
+
+// Taurus — calibrated from 3 verified windows (Feb, Jul, Nov 2026)
+// Offset from Gemini: −1.9222 days, avg duration: 89.19h
+const TAURUS_SID = [
+  ['2026-01-25T22:46','2026-01-29T15:57'],['2026-02-22T04:20','2026-02-25T21:31'],
+  ['2026-03-21T10:10','2026-03-25T03:21'],['2026-04-17T19:09','2026-04-21T12:20'],
+  ['2026-05-15T05:14','2026-05-18T22:25'],['2026-06-11T15:57','2026-06-15T09:08'],
+  ['2026-07-09T01:33','2026-07-12T18:44'],['2026-08-05T08:59','2026-08-09T02:10'],
+  ['2026-09-01T14:39','2026-09-05T07:50'],['2026-09-28T20:17','2026-10-02T13:28'],
+  ['2026-10-26T02:53','2026-10-29T20:04'],['2026-11-22T13:01','2026-11-26T06:12'],
+  ['2026-12-20T00:18','2026-12-23T17:29'],
+];
+
+// Libra — calibrated from 3 verified windows (Jan, Jun, Nov 2026)
+// Offset from Gemini: +8.3065 days, avg duration: 105.21h
+const LIBRA_SID = [
+  ['2026-02-05T04:15','2026-02-09T13:28'],['2026-03-04T09:49','2026-03-08T19:02'],
+  ['2026-03-31T15:39','2026-04-05T00:52'],['2026-04-28T00:38','2026-05-02T09:51'],
+  ['2026-05-25T10:43','2026-05-29T19:56'],['2026-06-21T21:26','2026-06-26T06:39'],
+  ['2026-07-19T07:02','2026-07-23T16:15'],['2026-08-15T14:28','2026-08-19T23:41'],
+  ['2026-09-11T20:08','2026-09-16T05:21'],['2026-10-09T01:46','2026-10-13T10:59'],
+  ['2026-11-05T08:22','2026-11-09T17:35'],['2026-12-02T18:30','2026-12-07T03:43'],
+  ['2026-12-30T05:47','2027-01-03T15:00'],
+];
+const SIGN_DATA = { 1: TAURUS_SID, 2: GEMINI_SID, 3: CANCER_SID, 4: LEO_SID, 7: LIBRA_SID, 11: PISCES_SID };
+
 // ── State ─────────────────────────────────────────────────
 let currentSign  = 2;
 let selectedTile = null;
@@ -260,6 +321,17 @@ let viewDate = (_today.getFullYear() === 2026)
 
 // ── Data ──────────────────────────────────────────────────
 function buildWindows(signIdx) {
+  if (SIGN_DATA[signIdx]) {
+    // Use verified data directly
+    return SIGN_DATA[signIdx].map(([ss,se]) => {
+      const sidStart  = localDate(ss);
+      const sidEnd    = localDate(se);
+      const tropStart = new Date(sidStart.getTime() - DELTA_MS);
+      const tropEnd   = new Date(sidEnd.getTime()   - DELTA_MS);
+      return {sidStart, sidEnd, tropStart, tropEnd, unionStart:tropStart, unionEnd:sidEnd};
+    });
+  }
+  // Estimate from Gemini by sign offset
   const off = (signIdx - 2) * DAYS_PER_SIGN * 86400000;
   return GEMINI_SID.map(([ss,se]) => {
     const sidStart  = new Date(localDate(ss).getTime() + off);
@@ -278,10 +350,16 @@ function moonDegAt(date) {
 
 // ── SVG ───────────────────────────────────────────────────
 const CX=180,CY=180,R_TROP=68,R_SID=88,R_UNION=108;
-// Gemini sidereal width derived from calendar data: ~47.88°
-// Other signs estimated at 30° for now (will be corrected when verified)
-const GEM_WIDTH = 47.88162093; // degrees, sidereal Gemini only
-const GEM_IDX   = 2;           // Gemini = sign index 2
+// Sign widths derived from calendar data (degrees, sidereal)
+const SIGN_WIDTHS = {
+  1:  48.94,  // Taurus — calibrated from 3 windows
+  2:  47.88,  // Gemini — verified
+  3:  47.98,  // Cancer — calibrated from 3 windows
+  4:  46.51,  // Leo — calibrated from 3 windows
+  7:  57.73,  // Libra — calibrated from 3 windows
+  11: 51.99,  // Pisces — calibrated from 3 windows
+};
+const DEFAULT_WIDTH = 30;
 const toRad = d => d*Math.PI/180;
 const px = (r,d) => CX+r*Math.cos(toRad(d-90));
 const py = (r,d) => CY+r*Math.sin(toRad(d-90));
@@ -306,7 +384,7 @@ function drawRings(signIdx, date) {
   for(let i=0;i<12;i++){
     const sel=i===signIdx;
     // Sidereal ring: use real width for selected Gemini, 30° for others
-    const sidW  = (sel && i===GEM_IDX) ? GEM_WIDTH : 30;
+    const sidW  = sel ? (SIGN_WIDTHS[i] || DEFAULT_WIDTH) : DEFAULT_WIDTH;
     const sidS  = norm(i*30);
     const sidE  = norm(sidS + sidW);
     svg.appendChild(svgEl('path',{d:arcD(R_SID,sidS,sidE),fill:'none',stroke:sel?'#4db896':'rgba(77,184,150,.12)','stroke-width':'13','stroke-linecap':'butt'}));
@@ -317,7 +395,7 @@ function drawRings(signIdx, date) {
   }
 
   // Union arc: tropical start → sidereal end (using real Gemini width)
-  const uSidW  = (signIdx===GEM_IDX) ? GEM_WIDTH : 30;
+  const uSidW  = SIGN_WIDTHS[signIdx] || DEFAULT_WIDTH;
   const unionS = norm(signIdx*30-AYAN);          // tropical start
   const unionE = norm(signIdx*30 + uSidW);       // sidereal end
   svg.appendChild(svgEl('path',{d:arcD(R_UNION,unionS,unionE),fill:'none',stroke:'#d4704a','stroke-width':'13','stroke-linecap':'butt','stroke-opacity':'.7'}));
@@ -599,10 +677,14 @@ function switchTab(name,el){
 
 // ── Sign selector ─────────────────────────────────────────
 const sel=document.getElementById('sign-select');
-const o=document.createElement('option');
-o.value=2; o.textContent='Gemini'; o.selected=true;
-sel.appendChild(o);
-sel.disabled=true; sel.style.opacity='0.5';
+[{i:1,name:'Taurus'},{i:2,name:'Gemini'},{i:3,name:'Cancer'},{i:4,name:'Leo'},{i:7,name:'Libra'},{i:11,name:'Pisces'}].forEach(({i,name})=>{
+  const o=document.createElement('option');
+  o.value=i; o.textContent=name;
+  if(i===2)o.selected=true;
+  sel.appendChild(o);
+});
+sel.disabled=false;
+sel.style.opacity='1';
 
 // ── Init ──────────────────────────────────────────────────
 updateStepperDisplay();
