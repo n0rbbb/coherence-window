@@ -1,4 +1,6 @@
-const CACHE = 'coherence-v2';
+// Network-first: always try to fetch the newest files, fall back to cache when offline.
+// Bump CACHE only if you ever need to force-clear old caches.
+const CACHE = 'coherence-v3';
 const ASSETS = [
   '/coherence-window/',
   '/coherence-window/index.html',
@@ -6,9 +8,7 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS))
-  );
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
   self.skipWaiting();
 });
 
@@ -22,7 +22,14 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    fetch(e.request)
+      .then(res => {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, copy));
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
