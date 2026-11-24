@@ -103,7 +103,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .tl-section-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.1em;color:var(--gold-dim);margin:0 4px 8px;}
 .tl-wheel-panel{padding:12px 12px 10px;}
 #tl-wheel .hit{cursor:pointer;}
-.tl-detail{background:var(--bg2);border:.5px solid var(--border);border-radius:12px;padding:16px 14px 16px 20px;font-size:13px;line-height:1.8;display:none;margin-bottom:16px;overflow:visible;}
+.tl-sub{font-size:12px;color:var(--text-dim);font-style:italic;margin:-4px 0 6px;line-height:1.4;}
+.tl-detail{background:var(--bg2);border:.5px solid var(--border);border-radius:12px;padding:16px 14px 14px;font-size:13px;line-height:1.8;display:none;margin-bottom:16px;overflow:visible;}
 .tl-detail.open{display:block;}
 .tl-detail-title{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.08em;color:var(--gold);margin-bottom:8px;}
 .phase-bar{height:4px;border-radius:2px;background:var(--bg3);margin-top:10px;overflow:hidden;position:relative;}
@@ -216,6 +217,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <div style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:.1em;color:var(--gold);margin:10px 0 8px">Technical notes</div>
       Tropical windows derived by applying a δ ≈ 1.836 day offset (ayanamsa 24.18° ÷ lunar speed 13.17°/day). The union window spans from tropical entry to sidereal exit — the widest conservative estimate.<br><br>
       Moon position is approximated from a linear model anchored to the Jan 27 2026 Gemini entry. Accurate to within a few hours; not ephemeris-grade.<br><br>
+      Moon phases in the Timeline detail come from a built-in table of exact New, Quarter and Full Moon times (computed astronomically, checked against USNO to within about a minute); between those events the phase is interpolated.<br><br>
       Times in the source calendar are UK time (GMT/BST). They are converted to the time zone you pick on the Rings and Timeline tabs, so a window is the same moment everywhere — only the clock reading changes. For example, 15:04 UK time reads 16:04 in Budapest and 07:04 in California (winter).<br><br>
       <span style="color:var(--text-dim)">All 12 signs verified directly from the source calendar for every window in 2026.</span>
     </div>
@@ -584,7 +586,7 @@ function onWheelTap(i){
     selectedTile=null; detailEl.classList.remove('open'); detailEl.innerHTML='';
   } else {
     selectedTile=i;
-    renderDetailBar(detailEl, wins[i], items[i].state==='open' ? date : null, i+1, items[i].label);
+    renderDetail(detailEl, wins[i], items[i].state==='open' ? date : null, i+1, items[i].label, items[i].state, wins, i);
     detailEl.classList.add('open');
   }
   drawWheel();
@@ -621,134 +623,165 @@ function drawWheel() {
   svg.querySelectorAll('.hit').forEach(el=>el.addEventListener('click',()=>onWheelTap(+el.dataset.i)));
 }
 
-// ── Vertical detail bar ───────────────────────────────────
-function renderDetailBar(el, w, nowDate, winNum, label) {
-  const BAR_H = 320; // px height of bar in SVG units
-  const BAR_W = 18;
-  const LBL_X = 28;  // x where right-side labels start
-  const SVG_W = 220;
-  const SVG_H = BAR_H + 40; // top/bottom padding
+// ── Moon phases ───────────────────────────────────────────
+// Exact New / First Quarter / Full / Last Quarter times (UTC; kind 0-3), computed with Meeus' algorithm and
+// checked against USNO (within ~1.5 min); the six events used in the earlier energy charts are pinned to USNO's
+// published minute. Between two events the phase advances linearly in time.
+const MOON_EVENTS = [['2025-11-05T13:19',2],['2025-11-12T05:28',3],['2025-11-20T06:47',0],['2025-11-28T06:59',1],['2025-12-04T23:14',2],['2025-12-11T20:52',3],['2025-12-20T01:43',0],['2025-12-27T19:10',1],['2026-01-03T10:03',2],['2026-01-10T15:48',3],['2026-01-18T19:52',0],['2026-01-26T04:48',1],['2026-02-01T22:09',2],['2026-02-09T12:43',3],['2026-02-17T12:01',0],['2026-02-24T12:28',1],['2026-03-03T11:38',2],['2026-03-11T09:39',3],['2026-03-19T01:24',0],['2026-03-25T19:18',1],['2026-04-02T02:12',2],['2026-04-10T04:52',3],['2026-04-17T11:52',0],['2026-04-24T02:32',1],['2026-05-01T17:23',2],['2026-05-09T21:11',3],['2026-05-16T20:01',0],['2026-05-23T11:11',1],['2026-05-31T08:45',2],['2026-06-08T10:01',3],['2026-06-15T02:54',0],['2026-06-21T21:55',1],['2026-06-29T23:57',2],['2026-07-07T19:29',3],['2026-07-14T09:44',0],['2026-07-21T11:06',1],['2026-07-29T14:36',2],['2026-08-06T02:22',3],['2026-08-12T17:37',0],['2026-08-20T02:46',1],['2026-08-28T04:19',2],['2026-09-04T07:51',3],['2026-09-11T03:27',0],['2026-09-18T20:44',1],['2026-09-26T16:49',2],['2026-10-03T13:25',3],['2026-10-10T15:50',0],['2026-10-18T16:13',1],['2026-10-26T04:12',2],['2026-11-01T20:30',3],['2026-11-09T07:02',0],['2026-11-17T11:48',1],['2026-11-24T14:53',2],['2026-12-01T06:08',3],['2026-12-09T00:52',0],['2026-12-17T05:43',1],['2026-12-24T01:28',2],['2026-12-30T19:00',3],['2027-01-07T20:24',0],['2027-01-15T20:35',1],['2027-01-22T12:17',2],['2027-01-29T10:56',3],['2027-02-06T15:56',0],['2027-02-14T07:59',1],['2027-02-20T23:24',2]].map(([s,k]) => [Date.parse(s+':00Z'), k]);
+const MOON_NAMES  = ['New moon','Waxing crescent','First quarter','Waxing gibbous','Full moon','Waning gibbous','Last quarter','Waning crescent'];
+const EVENT_NAMES = ['New Moon','First Quarter','Full Moon','Last Quarter'];
 
-  const unionSpan = w.unionEnd - w.unionStart;
-  const durD = (unionSpan / 3600000 / 24).toFixed(1);
+function moonPhase(t) {            // 0 = new, .25 = first quarter, .5 = full, .75 = last quarter
+  const E = MOON_EVENTS;
+  let i = 0;
+  while (i < E.length - 2 && E[i+1][0] <= t) i++;
+  const p = (E[i][1] + (t - E[i][0]) / (E[i+1][0] - E[i][0])) / 4;
+  return ((p % 1) + 1) % 1;
+}
+const moonIllum = t => (1 - Math.cos(2 * Math.PI * moonPhase(t))) / 2;
 
-  // Convert a timestamp to a Y position (bottom=start, top=end)
-  function toY(ts) {
-    const frac = (ts - w.unionStart) / unionSpan;
-    return SVG_H - 20 - frac * BAR_H;
+// ── Detail view: day spiral + Moon-cycle dial ─────────────
+const DETAIL_COL = { past:'#7d7d92', open:'#3ddc84', next:'#d4704a', future:'#5aa9e6' };
+const DC = 200;                                   // centre of the 400 x 400 dial drawings
+const dp = (r, a) => [DC + r*Math.sin(a*Math.PI/180), DC - r*Math.cos(a*Math.PI/180)];
+const f1 = n => n.toFixed(1);
+function darc(r, a0, a1) {
+  const [x0,y0] = dp(r,a0), [x1,y1] = dp(r,a1);
+  return `M${f1(x0)},${f1(y0)}A${r},${r} 0 ${(a1-a0)>180?1:0} 1 ${f1(x1)},${f1(y1)}`;
+}
+function moonGlyph(cx, cy, r, p) {                 // small Moon disc showing phase p (0..1)
+  const k = Math.cos(2*Math.PI*p), rx = (Math.abs(k)*r).toFixed(2);
+  const top = cx+','+(cy-r), bot = cx+','+(cy+r);
+  const d = p < .5
+    ? `M${top}A${r},${r} 0 0 1 ${bot}A${rx},${r} 0 0 ${k>0?0:1} ${top}Z`
+    : `M${top}A${r},${r} 0 0 0 ${bot}A${rx},${r} 0 0 ${k>0?1:0} ${top}Z`;
+  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#1b1b28" stroke="rgba(232,200,114,0.35)" stroke-width=".8"/><path d="${d}" fill="#e8c872"/>`;
+}
+const todH   = t => { const p = tzParts(t, displayTZ); return p.h + p.mi/60 + p.s/3600; };
+const wallMs = (t0, k, h, mi) => { const p = tzParts(t0, displayTZ); return zonedToMs(p.y, p.mo, p.d + k, h, mi, displayTZ); };
+const dayNo  = t => tzParts(t + 12*3600000, displayTZ).d;
+function midnightsIn(t0, t1) {
+  const out = [];
+  for (let k = 0; k < 12; k++) { const m = wallMs(t0, k, 0, 0); if (m >= t1) break; if (m > t0) out.push(m); }
+  return out;
+}
+const dvBadge = (x, y, t) =>
+  `<rect x="${x-10}" y="${y-6.5}" width="20" height="13" rx="3" fill="#0a0a0f" stroke="rgba(255,255,255,0.22)" stroke-width=".6"/>` +
+  `<text x="${x}" y="${y+.5}" text-anchor="middle" dominant-baseline="central" font-size="11" font-family="Crimson Pro, serif" fill="#cfcabb">${t}</text>`;
+function dvHours(R) {
+  return [[0,'00'],[90,'06'],[180,'12'],[270,'18']].map(([a,t]) => {
+    const [x,y] = dp(R+20, a);
+    return `<text x="${f1(x)}" y="${f1(y)}" text-anchor="middle" dominant-baseline="central" font-size="12" font-family="Cinzel, serif" fill="#7a7568">${t}</text>`;
+  }).join('');
+}
+function dvWedge(R) {                              // 00:00-08:00 as one wedge (0-120 degrees)
+  const [x,y] = dp(R+6, 120);
+  return `<path d="M${DC},${DC}L${DC},${DC-R-6}A${R+6},${R+6} 0 0 1 ${f1(x)},${f1(y)}Z" fill="rgba(120,100,220,0.09)"/>`;
+}
+function dvCallout(R, px_, py_, a, kind, time) {
+  const [lx,ly] = dp(R+8, a), [tx,ty] = dp(R+14, a), sn = Math.sin(a*Math.PI/180);
+  const an = sn > .3 ? 'start' : sn < -.3 ? 'end' : 'middle';
+  return `<line x1="${f1(px_)}" y1="${f1(py_)}" x2="${f1(lx)}" y2="${f1(ly)}" stroke="rgba(255,255,255,0.4)" stroke-width=".8"/>` +
+         `<circle cx="${f1(px_)}" cy="${f1(py_)}" r="3.5" fill="#fff"/>` +
+         `<text x="${f1(tx)}" y="${f1(ty-8)}" text-anchor="${an}" dominant-baseline="central" font-size="11" font-family="Crimson Pro, serif" fill="#a8a393">${kind}</text>` +
+         `<text x="${f1(tx)}" y="${f1(ty+7)}" text-anchor="${an}" dominant-baseline="central" font-size="13" font-family="Crimson Pro, serif" fill="#e8e4d8">${time}</text>`;
+}
+const dvEventMark = (x, y, kind) => moonGlyph(+f1(x), +f1(y), 6.5, kind/4) + `<circle cx="${f1(x)}" cy="${f1(y)}" r="9" fill="none" stroke="#c9a84c" stroke-width="1.3"/>`;
+const dvNowRing   = (x, y) => `<circle cx="${f1(x)}" cy="${f1(y)}" r="10" fill="none" stroke="#fff" stroke-width="1.6"/>`;
+
+// One turn per day on a 24-hour dial (midnight at the top, clockwise); time runs outward from the prep day
+function spiralSvg(w, col, asOf) {
+  const WS = w.unionStart.getTime(), WE = w.unionEnd.getTime(), tMin = WS - 86400000, tMax = WE;
+  const r0 = 30, R = 150;
+  const rad = t => r0 + (t - tMin) / (tMax - tMin) * (R - r0), ang = t => todH(t) / 24 * 360, at = t => dp(rad(t), ang(t));
+  const sty = tm => {
+    const prep = tm < WS, night = todH(tm) < 8;
+    return { stroke: night ? '#7864dc' : col, op: prep ? .5 : (asOf ? (tm <= asOf ? 1 : .4) : .9), dash: prep ? '3 3' : '' };
+  };
+  let s = dvWedge(R) + dvHours(R);
+  let T = [];
+  for (let t = tMin; t < tMax; t += 600000) T.push(t);
+  T.push(tMax, WS);
+  if (asOf) T.push(asOf);
+  for (let k = 0; k < 12; k++) T.push(wallMs(tMin, k, 0, 0), wallMs(tMin, k, 8, 0));
+  T = T.filter(t => t >= tMin && t <= tMax).sort((a, b) => a - b);
+  T = T.filter((t, i, a) => i === 0 || t - a[i-1] > 1000);
+  const runs = []; let cur = null;
+  for (let i = 0; i < T.length - 1; i++) {
+    const t0 = T[i], t1 = T[i+1], S = sty((t0 + t1) / 2), key = S.stroke + S.op + S.dash;
+    const p0 = at(t0), p1 = at(t1);
+    if (!cur || cur.key !== key) { cur = { key, S, pts: [p0] }; runs.push(cur); }
+    cur.pts.push(p1);
   }
-
-  // Collect midnight crossings (in the display zone) within the window
-  const startMs = w.unionStart.getTime(), endMs = w.unionEnd.getTime();
-  const sp = tzParts(startMs, displayTZ);
-  const midnights = [];
-  for (let k = 1; ; k++) {
-    const t = zonedToMs(sp.y, sp.mo, sp.d + k, 0, 0, displayTZ);
-    if (t >= endMs) break;
-    midnights.push(new Date(t));
-  }
-
-  const fmtFull = d => `${fmtDate(d)} ${fmtTime(d)}`;
-
-  // Segment fractions
-  const tropS = toY(w.tropStart), tropE = toY(w.tropEnd);
-  const sidS  = toY(w.sidStart),  sidE  = toY(w.sidEnd);
-  const barTop    = toY(w.unionEnd);   // top of bar (smaller Y = higher)
-  const barBottom = toY(w.unionStart); // bottom of bar
-
-  // Now marker
-  const nowY = (nowDate && nowDate >= w.unionStart && nowDate <= w.unionEnd)
-    ? toY(nowDate.getTime()) : null;
-
-  let svgRows = `
-    <svg width="100%" viewBox="0 0 ${SVG_W} ${SVG_H}" xmlns="http://www.w3.org/2000/svg"
-         style="font-family:'Crimson Pro',serif;overflow:visible">
-
-    <!-- Base bar -->
-    <rect x="0" y="${barTop}" width="${BAR_W}" height="${barBottom - barTop}"
-          fill="rgba(255,255,255,0.07)" rx="3"/>
-
-    <!-- Bar border -->
-    <rect x="0" y="${barTop}" width="${BAR_W}" height="${barBottom - barTop}"
-          fill="none" stroke="rgba(201,168,76,0.2)" stroke-width="0.5" rx="3"/>
-  `;
-
-  // 00:00–08:00 shaded bands for each day within the window
-  // (00:00 and 08:00 are wall-clock times in the display zone)
-  for (let k = 0; ; k++) {
-    const bandStart = zonedToMs(sp.y, sp.mo, sp.d + k, 0, 0, displayTZ);  // 00:00
-    if (bandStart >= endMs) break;
-    const bandEnd = zonedToMs(sp.y, sp.mo, sp.d + k, 8, 0, displayTZ);    // 08:00
-    // Clamp to union window
-    const clampedStart = Math.max(bandStart, startMs);
-    const clampedEnd   = Math.min(bandEnd,   endMs);
-    if (clampedEnd > clampedStart) {
-      const y1 = toY(clampedEnd);    // top of the band (later time = higher on screen)
-      const y2 = toY(clampedStart);  // bottom of the band
-      svgRows += `<rect x="0" y="${y1}" width="${BAR_W}" height="${y2 - y1}"
-        fill="rgba(120,100,220,0.12)" rx="0"/>`;
-    }
-  }
-  midnights.forEach(mn => {
-    const y = toY(mn.getTime());
-    // Skip the date text when it would collide with the start/end time labels (the tick line stays)
-    const clash = y < barTop + 26 || y > barBottom - 14;
-    svgRows += `
-      <line x1="0" y1="${y}" x2="${BAR_W + 6}" y2="${y}"
-            stroke="rgba(255,255,255,0.2)" stroke-width="0.5" stroke-dasharray="2 2"/>
-      ${clash ? '' : `<text x="${LBL_X}" y="${y + 1}" font-size="10" fill="rgba(255,255,255,0.35)"
-            dominant-baseline="middle">${fmtDate(mn)}</text>`}
-    `;
+  runs.forEach(r => {
+    s += `<polyline points="${r.pts.map(p => f1(p[0]) + ',' + f1(p[1])).join(' ')}" fill="none" stroke="${r.S.stroke}" stroke-opacity="${r.S.op}" stroke-width="7" stroke-linejoin="round" ${r.S.dash ? `stroke-dasharray="${r.S.dash}"` : ''}/>`;
   });
-
-  // Trop close / sid open labels removed per request
-
-  // Bottom label (union start)
-  svgRows += `
-    <text x="${LBL_X}" y="${barBottom - 2}" font-size="10.5"
-          fill="rgba(232,228,216,0.9)" dominant-baseline="auto">
-      ${fmtFull(w.unionStart)}
-    </text>
-    <text x="${LBL_X}" y="${barBottom + 10}" font-size="9"
-          fill="rgba(139,127,212,0.8)" dominant-baseline="auto">
-      trop opens
-    </text>
-  `;
-
-  // Top label (union end)
-  svgRows += `
-    <text x="${LBL_X}" y="${barTop + 12}" font-size="10.5"
-          fill="rgba(232,228,216,0.9)" dominant-baseline="auto">
-      ${fmtFull(w.unionEnd)}
-    </text>
-    <text x="${LBL_X}" y="${barTop + 22}" font-size="9"
-          fill="rgba(77,184,150,0.8)" dominant-baseline="auto">
-      sid closes
-    </text>
-  `;
-
-  // Transition time labels removed per request
-
-  // Now marker
-  if (nowY !== null) {
-    svgRows += `
-      <line x1="-6" y1="${nowY}" x2="${BAR_W + 6}" y2="${nowY}"
-            stroke="white" stroke-width="1.5"/>
-      <circle cx="${BAR_W + 10}" cy="${nowY}" r="3" fill="white"/>
-      <text x="${BAR_W + 16}" y="${nowY + 1}" font-size="10" fill="white"
-            dominant-baseline="middle">now</text>
-    `;
+  midnightsIn(tMin, tMax).forEach(m => { s += dvBadge(DC, DC - rad(m), dayNo(m)); });
+  for (let k = 0; k < 12; k++) {
+    const n = wallMs(tMin, k, 12, 0);
+    if (n > WS && n < WE) { const [x,y] = at(n); s += moonGlyph(+f1(x), +f1(y), 6, moonPhase(n)); }
   }
+  MOON_EVENTS.filter(e => e[0] > WS && e[0] < WE).forEach(e => { const [x,y] = at(e[0]); s += dvEventMark(x, y, e[1]); });
+  if (asOf && asOf >= tMin && asOf <= tMax) { const [x,y] = at(asOf); s += dvNowRing(x, y); }
+  const [sx,sy] = at(WS), [ex,ey] = at(WE);
+  s += dvCallout(R, sx, sy, ang(WS), 'start', fmtTime(new Date(WS))) + dvCallout(R, ex, ey, ang(WE), 'end', fmtTime(new Date(WE)));
+  return s;
+}
 
-  svgRows += `</svg>`;
+// The lunar month as a circle (new at the top, full at the bottom): where this window sits among the phases
+function cycleSvg(w, col, asOf, wins, idx, label, winNum) {
+  const WS = w.unionStart.getTime(), WE = w.unionEnd.getTime(), rr = 112;
+  let s = `<circle cx="${DC}" cy="${DC}" r="${rr}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="14"/>`;
+  const labs = { 0:'New', 2:'1st qtr', 4:'Full', 6:'Last qtr' };
+  for (let i = 0; i < 8; i++) {
+    const [x,y] = dp(152, i*45);
+    s += moonGlyph(+f1(x), +f1(y), 11, i/8);
+    if (labs[i]) s += `<text x="${f1(x)}" y="${f1(i===0 ? y-19 : y+25)}" text-anchor="middle" font-size="11" font-family="Crimson Pro, serif" fill="#7a7568">${labs[i]}</text>`;
+  }
+  const a0 = moonPhase(WS) * 360; let a1 = moonPhase(WE) * 360; if (a1 < a0) a1 += 360;
+  s += `<path d="${darc(rr,a0,a1)}" fill="none" stroke="${col}" stroke-width="14" stroke-linecap="round" stroke-opacity="${asOf ? .4 : .9}"/>`;
+  if (asOf) {
+    let am = moonPhase(asOf) * 360; if (am < a0) am += 360;
+    s += `<path d="${darc(rr,a0,am)}" fill="none" stroke="${col}" stroke-width="14" stroke-linecap="round"/>` + dvNowRing(...dp(rr, am));
+  }
+  MOON_EVENTS.filter(e => e[0] > WS && e[0] < WE).forEach(e => { const [x,y] = dp(rr, e[1]*90); s += dvEventMark(x, y, e[1]); });
+  wins.forEach((o, j) => {
+    const [x,y] = dp(88, moonPhase((o.unionStart.getTime() + o.unionEnd.getTime()) / 2) * 360);
+    s += j === idx ? `<circle cx="${f1(x)}" cy="${f1(y)}" r="5" fill="${col}"/>` : `<circle cx="${f1(x)}" cy="${f1(y)}" r="3" fill="rgba(255,255,255,0.4)"/>`;
+  });
+  const p0 = moonPhase(WS), p1 = moonPhase(WE);
+  const n0 = MOON_NAMES[Math.round(p0*8) % 8], n1 = MOON_NAMES[Math.round(p1*8) % 8];
+  const il0 = Math.round(moonIllum(WS)*100), il1 = Math.round(moonIllum(WE)*100);
+  s += `<text x="${DC}" y="${DC-26}" text-anchor="middle" font-size="11" letter-spacing="1.2" font-family="Cinzel, serif" fill="#7a6230">WINDOW ${winNum} · ${label.toUpperCase()}</text>`;
+  s += `<text x="${DC}" y="${DC-2}" text-anchor="middle" font-size="15" font-family="Crimson Pro, serif" fill="#e8e4d8">${n0}</text>`;
+  s += `<text x="${DC}" y="${DC+18}" text-anchor="middle" font-size="15" font-family="Crimson Pro, serif" fill="#e8e4d8">${n0 === n1 ? '' : '→ ' + n1}</text>`;
+  s += `<text x="${DC}" y="${DC+38}" text-anchor="middle" font-size="12" font-family="Crimson Pro, serif" fill="#7a7568">${il0}% → ${il1}% lit</text>`;
+  return s;
+}
 
+function renderDetail(el, w, nowDate, winNum, label, state, wins, idx) {
+  const col = DETAIL_COL[state];
+  const WS = w.unionStart.getTime(), WE = w.unionEnd.getTime();
+  const asOf = (state === 'open' && nowDate) ? nowDate.getTime() : null;
+  const dur = ((WE - WS) / 86400000).toFixed(1);
+  const evs = MOON_EVENTS.filter(e => e[0] > WS && e[0] < WE);
+  const evHtml = evs.length
+    ? evs.map(e => `<div style="display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 16 16">${moonGlyph(8, 8, 7, e[1]/4)}</svg><span>${EVENT_NAMES[e[1]]} · ${fmtDate(new Date(e[0]))} · ${fmtTime(new Date(e[0]))}</span></div>`).join('')
+    : `<div style="font-style:italic">No New, Quarter or Full Moon falls inside this window.</div>`;
   el.innerHTML = `
-    <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.08em;
-                color:var(--gold);margin-bottom:14px">
-      Window ${winNum} · ${label} · ${durD} days
+    <div class="tl-detail-title">Window ${winNum} · ${label} · ${dur} days</div>
+    <div class="tl-sub">Day by day · one turn per day, midnight at the top</div>
+    <svg viewBox="0 0 400 400" width="100%" role="img" aria-label="Day spiral for window ${winNum}">${spiralSvg(w, col, asOf)}</svg>
+    <div class="legend" style="justify-content:center;margin:2px 0 8px">
+      <div class="leg"><div class="leg-dot" style="background:#7864dc;border-radius:2px"></div>00:00–08:00</div>
+      <div class="leg"><span style="display:inline-block;width:14px;border-top:1.5px dashed var(--text-dim)"></span>Prep day</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--moon)"></div>Moon at noon</div>
+      ${asOf ? '<div class="leg"><div class="leg-dot" style="border:1.5px solid #fff;background:transparent"></div>Viewed day</div>' : ''}
     </div>
-    ${svgRows}
-  `;
+    <div style="font-size:13px;line-height:1.7;color:var(--text-dim);display:flex;flex-direction:column;gap:2px;margin-bottom:6px">${evHtml}</div>
+    <div class="tl-detail-title" style="margin-top:20px">Moon cycle</div>
+    <div class="tl-sub">Where this window sits among the lunar phases · dots show all windows</div>
+    <svg viewBox="0 0 400 400" width="100%" role="img" aria-label="Moon cycle dial for window ${winNum}">${cycleSvg(w, col, asOf, wins, idx, label, winNum)}</svg>`;
 }
 
 // ── Date stepper ──────────────────────────────────────────
